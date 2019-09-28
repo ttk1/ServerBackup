@@ -1,0 +1,3 @@
+# ServerBackup
+
+SpigotサーバのデータをS3にバックアップ
