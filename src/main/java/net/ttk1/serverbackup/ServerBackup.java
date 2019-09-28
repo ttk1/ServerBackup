@@ -3,8 +3,12 @@ package net.ttk1.serverbackup;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 public class ServerBackup extends JavaPlugin {
     @Override
@@ -25,22 +29,52 @@ public class ServerBackup extends JavaPlugin {
         }
         this.getLogger().info("プラグインの初期化完了!");
 
+        File piyo = new File(dataFolder,"piyo.txt");
+        if (!piyo.exists()) {
+            try {
+                if (!piyo.createNewFile()) {
+                    this.getLogger().info("テスト用ファイルの作成失敗");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         // バックアップ対象の抽出テスト用
-        List<File> targetFiles = this.getTargetFiles(worldContainer);
+        // とりあえず、データフォルダを除外する
+        FilenameFilter filter = (dir, name) -> {
+            try {
+                return !dir.getCanonicalPath().equals(dataFolder.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        };
+
+        List<File> targetFiles = this.getTargetFiles(worldContainer, filter);
+
+        // とりあえずリストの表示
         for (File file: targetFiles) {
             this.getLogger().info((file.getAbsolutePath()));
         }
+
+        // アーカイブ
+        try {
+            GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(new File(dataFolder, "archive.tar.gz")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private List<File> getTargetFiles(File entryPoint) {
+    private List<File> getTargetFiles(File entryPoint, FilenameFilter filter) {
         List<File> targetFiles = new ArrayList<>();
         // 何らかの処理
         if (entryPoint.exists()) {
             if (entryPoint.isDirectory()) {
                 // フォルダの場合
-                File[] listFiles = entryPoint.listFiles();
+                File[] listFiles = entryPoint.listFiles(filter);
                 for (File file : listFiles) { // TODO: nullチェック
-                    targetFiles.addAll(getTargetFiles(file));
+                    targetFiles.addAll(getTargetFiles(file, filter));
                 }
             } else {
                 // ファイルの場合
