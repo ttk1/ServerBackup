@@ -4,3 +4,12 @@ main: ${plugin.main}
 description: ${plugin.description}
 author: ${plguin.author}
 website: ${plugin.website}
+
+commands:
+  backup:
+    description: server backup command
+    aliases: bk
+
+permissions:
+  serverbackup.backup:
+    default: op
