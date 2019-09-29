@@ -29,6 +29,8 @@ public class ServerBackup extends JavaPlugin {
         }
         this.getLogger().info("プラグインの初期化完了!");
 
+        //////// ここから下は後で消す ////////
+
         File piyo = new File(dataFolder,"piyo.txt");
         if (!piyo.exists()) {
             try {
@@ -42,12 +44,10 @@ public class ServerBackup extends JavaPlugin {
 
         // バックアップ対象の抽出テスト用
         // とりあえず、データフォルダを除外する
-        FilenameFilter filter = (dir, name) -> {
-            try {
-                return !dir.getCanonicalPath().equals(dataFolder.getCanonicalPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return !dir.getPath().endsWith(dataFolder.getPath());
             }
         };
 
@@ -55,7 +55,7 @@ public class ServerBackup extends JavaPlugin {
 
         // とりあえずリストの表示
         for (File file: targetFiles) {
-            this.getLogger().info((file.getAbsolutePath()));
+            this.getLogger().info((file.getPath()));
         }
 
         // アーカイブ
