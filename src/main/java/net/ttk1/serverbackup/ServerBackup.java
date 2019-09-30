@@ -1,6 +1,7 @@
 package net.ttk1.serverbackup;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -13,6 +14,7 @@ public class ServerBackup extends JavaPlugin {
         File serverFolder = this.getServer().getWorldContainer();
         File dataFolder = this.getDataFolder();
 
+        // データフォルダ作成
         if (!dataFolder.exists()) {
             this.getLogger().info("データフォルダを作成します: " + dataFolder.getPath());
             if (!dataFolder.mkdir()) {
@@ -23,6 +25,11 @@ public class ServerBackup extends JavaPlugin {
             }
         }
 
+        // 設定ファイル読み込み
+        this.saveDefaultConfig();
+        FileConfiguration config = this.getConfig();
+
+        // コマンド登録
         PluginCommand command = this.getCommand("backup");
         if (command == null) {
             this.getLogger().info("コマンドの作成に失敗しました。");
