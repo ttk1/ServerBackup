@@ -17,12 +17,14 @@ import java.util.zip.GZIPOutputStream;
 public class BackupTask extends BukkitRunnable {
     private final File dataFolder;
     private final File serverFolder;
+    private final S3Service s3Service;
     private final CommandSender commandSender;
     private final byte[] buf = new byte[1024];
 
-    BackupTask(File dataFolder, File serverFolder, CommandSender commandSender) {
-        this.dataFolder = dataFolder;
+    BackupTask(File serverFolder, File dataFolder, S3Service s3Service, CommandSender commandSender) {
         this.serverFolder = serverFolder;
+        this.dataFolder = dataFolder;
+        this.s3Service = s3Service;
         this.commandSender = commandSender;
     }
 
@@ -34,7 +36,8 @@ public class BackupTask extends BukkitRunnable {
             List<File> targetFiles = this.getTargetFiles(serverFolder, filter);
 
             // TODO: バックアップファイル名
-            GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(new File(dataFolder, "archive.tar.gz")));
+            File backupFile = new File(dataFolder, "archive.tar.gz");
+            GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(backupFile));
             TarArchiveOutputStream tos = new TarArchiveOutputStream(gos);
             for (File targetFile : targetFiles) {
                 ArchiveEntry archiveEntry = tos.createArchiveEntry(targetFile, targetFile.getPath());
@@ -47,7 +50,13 @@ public class BackupTask extends BukkitRunnable {
                 tos.closeArchiveEntry();
             }
             tos.close();
-            this.commandSender.sendMessage("バックアップが完了しました。");
+            if (this.s3Service != null) {
+                this.commandSender.sendMessage("S3へアップロードを開始します。");
+                this.s3Service.upload(backupFile);
+                this.commandSender.sendMessage("アップロードが完了しました。");
+            } else {
+                this.commandSender.sendMessage("バックアップが完了しました。");
+            }
         } catch (Exception e) {
             this.commandSender.sendMessage("バックアップに失敗しました。");
             e.printStackTrace();

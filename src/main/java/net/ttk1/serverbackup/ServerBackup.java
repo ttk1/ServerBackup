@@ -4,40 +4,43 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
-
 public class ServerBackup extends JavaPlugin {
     @Override
     public void onEnable() {
         this.getLogger().info("プラグインの初期化開始");
+        if (this.init()) {
+            this.getLogger().info("プラグインの初期化完了");
+        } else {
+            this.getLogger().info("プラグインの初期化に失敗しました。");
+        }
+    }
 
-        File serverFolder = this.getServer().getWorldContainer();
-        File dataFolder = this.getDataFolder();
-
-        // データフォルダ作成
-        if (!dataFolder.exists()) {
-            this.getLogger().info("データフォルダを作成します: " + dataFolder.getPath());
-            if (!dataFolder.mkdir()) {
-                this.getLogger().info("データフォルダの作成に失敗しました。");
-                return; // 機能停止
+    private boolean init() {
+        try {
+            this.saveDefaultConfig();
+            FileConfiguration config = this.getConfig();
+            BackupCommand backupCommand;
+            if (config.getBoolean("use_s3", false)) {
+                backupCommand = new BackupCommand(this, new S3Service(
+                        config.getString("s3.region", "ap-northeast-1"),
+                        config.getString("s3.bucket_name"),
+                        config.getString("s3.prefix"),
+                        config.getString("s3.access_key"),
+                        config.getString("s3.access_token")
+                ));
             } else {
-                this.getLogger().info("データフォルダが作成されました。");
+                backupCommand = new BackupCommand(this, null);
             }
+            PluginCommand command = this.getCommand("backup");
+            if (command == null) {
+                return false;
+            }
+            command.setExecutor(backupCommand);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-
-        // 設定ファイル読み込み
-        this.saveDefaultConfig();
-        FileConfiguration config = this.getConfig();
-
-        // コマンド登録
-        PluginCommand command = this.getCommand("backup");
-        if (command == null) {
-            this.getLogger().info("コマンドの作成に失敗しました。");
-            return; // 機能停止
-        }
-        command.setExecutor(new BackupCommand(this, dataFolder, serverFolder));
-
-        this.getLogger().info("プラグインの初期化完了");
     }
 
     @Override
