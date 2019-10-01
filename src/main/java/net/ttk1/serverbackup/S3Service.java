@@ -33,11 +33,11 @@ class S3Service {
                 .build();
     }
 
-    void upload(File backupFile) throws Exception {
+    void upload(File backupFile) throws BackupException {
         if (!this.overwrite) {
             ObjectListing objectListing = s3Client.listObjects(this.bucket_name, this.prefix + "/" + backupFile.getName());
             if (objectListing.getObjectSummaries().size() > 0) {
-                throw new Exception("既にS3にファイルが存在します。");
+                throw new BackupException("既にS3にファイルが存在します。");
             }
         }
         this.s3Client.putObject(this.bucket_name, this.prefix + "/" + backupFile.getName(), backupFile);

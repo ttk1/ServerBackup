@@ -6,10 +6,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,20 +58,19 @@ public class BackupTask extends BukkitRunnable {
             } else {
                 this.commandSender.sendMessage("バックアップが完了しました。");
             }
-        } catch (Exception e) {
-            // TODO: 後でキャッチ用の例外作る
+        } catch (BackupException | IOException e) {
             this.commandSender.sendMessage("バックアップに失敗しました。");
             e.printStackTrace();
         }
     }
 
-    private List<File> getTargetFiles(File entryPoint, FilenameFilter filter) throws Exception {
+    private List<File> getTargetFiles(File entryPoint, FilenameFilter filter) throws BackupException {
         List<File> targetFiles = new ArrayList<>();
         if (entryPoint.exists()) {
             if (entryPoint.isDirectory()) {
                 File[] listFiles = entryPoint.listFiles(filter);
                 if (listFiles == null) {
-                    throw new Exception("エラー");
+                    throw new BackupException("バックアップ対象のリストに失敗しました。");
                 }
                 for (File file : listFiles) {
                     targetFiles.addAll(getTargetFiles(file, filter));
