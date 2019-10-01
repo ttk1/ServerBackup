@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -35,8 +37,10 @@ public class BackupTask extends BukkitRunnable {
             FilenameFilter filter = (dir, name) -> !dir.getPath().endsWith(dataFolder.getPath());
             List<File> targetFiles = this.getTargetFiles(serverFolder, filter);
 
-            // TODO: バックアップファイル名
-            File backupFile = new File(dataFolder, "archive.tar.gz");
+            SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd.HH-mm-ss");
+            String backupFileName = f.format(new Date()) + ".tar.gz";
+            File backupFile = new File(dataFolder, backupFileName);
+
             GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(backupFile));
             TarArchiveOutputStream tos = new TarArchiveOutputStream(gos);
             for (File targetFile : targetFiles) {
@@ -58,6 +62,7 @@ public class BackupTask extends BukkitRunnable {
                 this.commandSender.sendMessage("バックアップが完了しました。");
             }
         } catch (Exception e) {
+            // TODO: 後でキャッチ用の例外作る
             this.commandSender.sendMessage("バックアップに失敗しました。");
             e.printStackTrace();
         }
@@ -69,7 +74,6 @@ public class BackupTask extends BukkitRunnable {
             if (entryPoint.isDirectory()) {
                 File[] listFiles = entryPoint.listFiles(filter);
                 if (listFiles == null) {
-                    // TODO: 後でキャッチ用の例外作る
                     throw new Exception("エラー");
                 }
                 for (File file : listFiles) {
