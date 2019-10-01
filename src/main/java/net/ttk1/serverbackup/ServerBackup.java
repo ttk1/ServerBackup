@@ -23,6 +23,7 @@ public class ServerBackup extends JavaPlugin {
             if (config.getBoolean("use_s3", false)) {
                 backupCommand = new BackupCommand(this, new S3Service(
                         config.getString("s3.region", "ap-northeast-1"),
+                        config.getBoolean("s3.overwrite", false),
                         config.getString("s3.bucket_name"),
                         config.getString("s3.prefix"),
                         config.getString("s3.access_key"),
