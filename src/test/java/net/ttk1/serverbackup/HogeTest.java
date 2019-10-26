@@ -16,9 +16,4 @@ public class HogeTest {
     public void piyoTest() {
         assertThat(1, not(0));
     }
-
-    @Test
-    public void fugaTest() {
-        assertThat(1, is(0));
-    }
 }

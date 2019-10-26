@@ -1,7 +1,6 @@
 package net.ttk1.serverbackup;
 
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ServerBackup extends JavaPlugin {
@@ -18,25 +17,11 @@ public class ServerBackup extends JavaPlugin {
     private boolean init() {
         try {
             this.saveDefaultConfig();
-            FileConfiguration config = this.getConfig();
-            BackupCommand backupCommand;
-            if (config.getBoolean("use_s3", false)) {
-                backupCommand = new BackupCommand(this, new S3Service(
-                        config.getString("s3.region", "ap-northeast-1"),
-                        config.getBoolean("s3.overwrite", true),
-                        config.getString("s3.bucket_name"),
-                        config.getString("s3.prefix"),
-                        config.getString("s3.access_key"),
-                        config.getString("s3.access_token")
-                ));
-            } else {
-                backupCommand = new BackupCommand(this, null);
-            }
             PluginCommand command = this.getCommand("backup");
             if (command == null) {
                 return false;
             }
-            command.setExecutor(backupCommand);
+            command.setExecutor(new BackupCommandExecutor(new BackupTaskRunner(this)));
             return true;
         } catch (Exception e) {
             e.printStackTrace();

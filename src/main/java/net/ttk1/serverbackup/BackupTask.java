@@ -2,7 +2,6 @@ package net.ttk1.serverbackup;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -17,20 +16,20 @@ public class BackupTask extends BukkitRunnable {
     private final File dataFolder;
     private final File serverFolder;
     private final S3Service s3Service;
-    private final CommandSender commandSender;
-    private final byte[] buf = new byte[1024];
+    private final CommandSender sender;
+    private static final byte[] buf = new byte[1024];
 
-    BackupTask(File serverFolder, File dataFolder, S3Service s3Service, CommandSender commandSender) {
+    BackupTask(File serverFolder, File dataFolder, S3Service s3Service, CommandSender sender) {
         this.serverFolder = serverFolder;
         this.dataFolder = dataFolder;
         this.s3Service = s3Service;
-        this.commandSender = commandSender;
+        this.sender = sender;
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         try {
-            this.commandSender.sendMessage("バックアップを開始します。");
+            this.sender.sendMessage("バックアップを開始します。");
             FilenameFilter filter = (dir, name) -> !dir.getPath().endsWith(dataFolder.getPath());
             List<File> targetFiles = this.getTargetFiles(serverFolder, filter);
 
@@ -52,14 +51,14 @@ public class BackupTask extends BukkitRunnable {
             }
             tos.close();
             if (this.s3Service != null) {
-                this.commandSender.sendMessage("S3へアップロードを開始します。");
+                this.sender.sendMessage("S3へアップロードを開始します。");
                 this.s3Service.upload(backupFile);
-                this.commandSender.sendMessage("アップロードが完了しました。");
+                this.sender.sendMessage("アップロードが完了しました。");
             } else {
-                this.commandSender.sendMessage("バックアップが完了しました。");
+                this.sender.sendMessage("バックアップが完了しました。");
             }
         } catch (BackupException | IOException e) {
-            this.commandSender.sendMessage("バックアップに失敗しました。");
+            this.sender.sendMessage("バックアップに失敗しました。");
             e.printStackTrace();
         }
     }
