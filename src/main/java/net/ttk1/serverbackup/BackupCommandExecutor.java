@@ -14,7 +14,7 @@ public class BackupCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] strings) {
         if (sender.hasPermission("serverbackup.backup")) {
-            this.backupTaskRunner.runBackupTask(sender);
+            backupTaskRunner.runBackupTask(sender);
         } else {
             sender.sendMessage("コマンドを実行するための権限がありません。");
         }

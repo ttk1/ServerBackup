@@ -29,7 +29,7 @@ public class BackupTask extends BukkitRunnable {
     @Override
     public synchronized void run() {
         try {
-            this.sender.sendMessage("バックアップを開始します。");
+            sender.sendMessage("バックアップを開始します。");
             FilenameFilter filter = (dir, name) -> !dir.getPath().endsWith(dataFolder.getPath());
             List<File> targetFiles = this.getTargetFiles(serverFolder, filter);
 
@@ -50,15 +50,15 @@ public class BackupTask extends BukkitRunnable {
                 tos.closeArchiveEntry();
             }
             tos.close();
-            if (this.s3Service != null) {
-                this.sender.sendMessage("S3へアップロードを開始します。");
-                this.s3Service.upload(backupFile);
-                this.sender.sendMessage("アップロードが完了しました。");
+            if (s3Service != null) {
+                sender.sendMessage("S3へアップロードを開始します。");
+                s3Service.upload(backupFile);
+                sender.sendMessage("アップロードが完了しました。");
             } else {
-                this.sender.sendMessage("バックアップが完了しました。");
+                sender.sendMessage("バックアップが完了しました。");
             }
         } catch (BackupException | IOException e) {
-            this.sender.sendMessage("バックアップに失敗しました。");
+            sender.sendMessage("バックアップに失敗しました。");
             e.printStackTrace();
         }
     }

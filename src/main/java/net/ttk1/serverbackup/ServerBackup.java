@@ -6,18 +6,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ServerBackup extends JavaPlugin {
     @Override
     public void onEnable() {
-        this.getLogger().info("プラグインの初期化開始");
-        if (this.init()) {
-            this.getLogger().info("プラグインの初期化完了");
+        getLogger().info("プラグインの初期化開始");
+        if (init()) {
+            getLogger().info("プラグインの初期化完了");
         } else {
-            this.getLogger().info("プラグインの初期化に失敗しました。");
+            getLogger().info("プラグインの初期化に失敗しました。");
         }
     }
 
     private boolean init() {
         try {
-            this.saveDefaultConfig();
-            PluginCommand command = this.getCommand("backup");
+            saveDefaultConfig();
+            PluginCommand command = getCommand("backup");
             if (command == null) {
                 return false;
             }
@@ -31,6 +31,6 @@ public class ServerBackup extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.getLogger().info("bye!");
+        getLogger().info("bye!");
     }
 }

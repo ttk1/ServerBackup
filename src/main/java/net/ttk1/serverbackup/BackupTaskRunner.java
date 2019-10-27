@@ -13,11 +13,14 @@ public class BackupTaskRunner {
 
     BackupTaskRunner(ServerBackup plugin) {
         this.plugin = plugin;
-        this.serverFolder = this.plugin.getServer().getWorldContainer();
-        this.dataFolder = this.plugin.getDataFolder();
-        FileConfiguration config = this.plugin.getConfig();
+        this.serverFolder = plugin.getServer().getWorldContainer();
+        this.dataFolder = plugin.getDataFolder();
+        this.s3Service = getS3Service(plugin.getConfig());
+    }
+
+    static S3Service getS3Service(FileConfiguration config) {
         if (config.getBoolean("use_s3", false)) {
-            this.s3Service = new S3Service(
+            return new S3Service(
                     config.getString("s3.region", "ap-northeast-1"),
                     config.getBoolean("s3.overwrite", true),
                     config.getString("s3.bucket_name"),
@@ -26,17 +29,15 @@ public class BackupTaskRunner {
                     config.getString("s3.access_token")
             );
         } else {
-            this.s3Service = null;
+            return null;
         }
     }
 
+    BackupTask getBackupTask(CommandSender sender) {
+        return new BackupTask(serverFolder, dataFolder, s3Service, sender);
+    }
+
     void runBackupTask(CommandSender sender) {
-        BackupTask backupTask = new BackupTask(
-                this.serverFolder,
-                this.dataFolder,
-                this.s3Service,
-                sender
-        );
-        backupTask.runTaskAsynchronously(this.plugin);
+        getBackupTask(sender).runTaskAsynchronously(plugin);
     }
 }

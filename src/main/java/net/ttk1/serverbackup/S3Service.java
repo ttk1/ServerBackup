@@ -34,12 +34,12 @@ class S3Service {
     }
 
     void upload(File backupFile) throws BackupException {
-        if (!this.overwrite) {
-            ObjectListing objectListing = s3Client.listObjects(this.bucket_name, this.prefix + "/" + backupFile.getName());
+        if (!overwrite) {
+            ObjectListing objectListing = s3Client.listObjects(bucket_name, prefix + "/" + backupFile.getName());
             if (objectListing.getObjectSummaries().size() > 0) {
                 throw new BackupException("既にS3にファイルが存在します。");
             }
         }
-        this.s3Client.putObject(this.bucket_name, this.prefix + "/" + backupFile.getName(), backupFile);
+        s3Client.putObject(bucket_name, prefix + "/" + backupFile.getName(), backupFile);
     }
 }
