@@ -59,4 +59,11 @@ public class BackupTaskRunnerTest {
         S3Service s3Service = BackupTaskRunner.getS3Service(config);
         assertThat(s3Service, nullValue());
     }
+
+    @Test
+    public void getBackupTaskTest() {
+        ServerBackup plugin = mock(ServerBackup.class);
+        BackupTaskRunner backupTaskRunner = new BackupTaskRunner(plugin);
+        BackupTask backupTask = backupTaskRunner.getBackupTask(null);
+    }
 }

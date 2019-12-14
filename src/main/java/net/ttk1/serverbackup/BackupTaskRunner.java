@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 
-public class BackupTaskRunner {
+class BackupTaskRunner {
     private final ServerBackup plugin;
     private final File serverFolder;
     private final File dataFolder;
